@@ -1,0 +1,275 @@
+#!/bin/sh
+#
+# ifup-ippp
+# 
+# This script is normally called from the ifup script when it detects a ippp device. 
+
+PATH="/sbin:/usr/sbin:/bin:/usr/bin"
+
+echo "Activating device: $1"
+
+# Check that ISDN module is up
+# `lsmod |grep isdn`  || echo "ISDN module not loaded! Exiting" ; exit
+
+# Check that ipppd is available
+[ -x /usr/sbin/ipppd ] || [ -x /sbin/ipppd ] || {
+  echo "/usr/sbin/ipppd does not exist or is not executable"
+  echo "Exiting"
+  logger -p daemon.info -t ifup-ippp \
+    "ipppd does not exist or is not executable"
+  exit 1
+}
+
+# Set configname = device
+CONFIG=$1
+
+# Main configuration, if available
+if [ -f /etc/sysconfig/isdn ] ; then
+    echo "Loading global settings: /etc/sysconfig/isdn"
+    . /etc/sysconfig/isdn
+fi
+
+# Set profile directory, if available
+if [ -f $I4L_PROFILEDIR ] ; then
+	$I4L_PROFILEDIR="/etc/isdn/profile"
+fi
+
+# Default config, if available
+if [ -f "$I4L_PROFILEDIR/ippp.default" ] ; then
+	echo "Loading default settings: $I4L_PROFILEDIR/ippp.default"
+	. "$I4L_PROFILEDIR/ippp.default"
+fi
+
+# Device net config
+echo "Loading network settings: $CONFIG"
+. $CONFIG
+
+# Custom link config, if available
+I4L_PROFILE=`cat /etc/isdn/profile/ippp.map | grep $DEVICE | awk -F "=" '{print $2}' | tr -d ' \"' `
+if [ -f "$I4L_PROFILEDIR/link/$I4L_PROFILE" ] ; then
+	echo "Loading link settings: $I4L_PROFILEDIR/link/$I4L_PROFILE"
+		. "$I4L_PROFILEDIR/link/$I4L_PROFILE"
+	echo "Using profile $I4L_PROFILE : $I4L_PROFILENAME"
+fi
+
+# Add ippp device
+isdnctrl addif $DEVICE
+
+cat /proc/net/dev | grep $DEVICE >& /dev/null
+if test $? -ne 0; then
+    echo "$0: $DEVICE doesn't exist in /proc/net/dev"
+    echo "Check ISDN hardware configuration"
+    echo ""
+    exit 1
+fi
+
+# define local MSN (phone number):
+isdnctrl eaz $DEVICE ${I4L_LOCALMSN}
+
+# Dialout numbers
+
+# 1.0 config? 
+if [ "$I4L_REMOTE_OUT1" != "" ] ; then
+	I4L_REMOTE_OUT="$I4L_REMOTE_OUT1 $I4L_REMOTE_OUT2"	
+fi 
+
+if [ "$I4L_REMOTE_IN1" != "" ] ; then
+	I4L_REMOTE_IN="$I4L_REMOTE_IN1 $I4L_REMOTE_IN2"	
+fi
+
+echo ${I4L_REMOTE_OUT} | while read out1 out2 out3 out4 out5; do
+	test -z "$out1" || isdnctrl addphone $DEVICE out $out1
+	test -z "$out2" || isdnctrl addphone $DEVICE out $out2	
+	test -z "$out3" || isdnctrl addphone $DEVICE out $out3
+	test -z "$out4" || isdnctrl addphone $DEVICE out $out4
+	test -z "$out5" || isdnctrl addphone $DEVICE out $out5
+done
+
+# Dialin numbers
+ 
+echo ${I4L_REMOTE_IN} | while read in1 in2 in3 in4 in5; do
+	test -z "$in1" || isdnctrl addphone $DEVICE in $in1
+	test -z "$in2" || isdnctrl addphone $DEVICE in $in2	
+	test -z "$in3" || isdnctrl addphone $DEVICE in $in3
+	test -z "$in4" || isdnctrl addphone $DEVICE in $in4
+	test -z "$in5" || isdnctrl addphone $DEVICE in $in5
+done
+
+# the  layer-2 protocol:
+isdnctrl l2_prot $DEVICE $I4L_L2
+
+# the  layer-3 protocol:
+isdnctrl l3_prot $DEVICE $I4L_L3
+
+# encapsulation
+isdnctrl encap $DEVICE $I4L_ENCAP
+
+# secure?, on = only defined numbers are allowed to call in
+isdnctrl secure $DEVICE $I4L_SECURE
+
+# on demand (SV)
+isdnctrl dialmode $SLAVE auto
+
+# automatic hangup if idle:
+isdnctrl huptimeout $DEVICE ${I4L_IDLETIME}
+
+# hangup before  next  charge  info?
+isdnctrl chargehup $DEVICE $I4L_CHARGEHUP
+
+# set the number of dial atempts for each number
+test -z "$I4L_DIALMAX" ||
+    isdnctrl dialmax $DEVICE $I4L_DIALMAX
+
+# callback features
+isdnctrl callback $DEVICE $I4L_CALLBACK
+isdnctrl cbdelay $DEVICE $I4L_CBDELAY
+isdnctrl cbhup $DEVICE $I4L_CBHUP
+
+if [ -n "$SLAVE" ]; then
+     isdnctrl addslave $DEVICE $SLAVE
+#     I4L_PPPOPTIONS="$I4L_PPPOPTIONS /dev/$SLAVE"
+
+
+    # define local MSN (phone number):
+    isdnctrl eaz $SLAVE ${I4L_LOCALMSN}
+	# Dialout numbers
+	echo ${I4L_REMOTE_OUT} | while read out1 out2 out3 out4 out5; do
+		test -z "$out1" || isdnctrl addphone $SLAVE out $out1
+		test -z "$out2" || isdnctrl addphone $SLAVE out $out2	
+		test -z "$out3" || isdnctrl addphone $SLAVE out $out3
+		test -z "$out4" || isdnctrl addphone $SLAVE out $out4
+		test -z "$out5" || isdnctrl addphone $SLAVE out $out5
+	done
+
+	# Dialin numbers 
+	echo ${I4L_REMOTE_IN} | while read in1 in2 in3 in4 in5; do
+		test -z "$in1" || isdnctrl addphone $SLAVE in $in1
+		test -z "$in2" || isdnctrl addphone $SLAVE in $in2	
+		test -z "$in3" || isdnctrl addphone $SLAVE in $in3
+		test -z "$in4" || isdnctrl addphone $SLAVE in $in4
+		test -z "$in5" || isdnctrl addphone $SLAVE in $in5
+	done
+	# the  layer-2 protocol:
+	isdnctrl l2_prot $SLAVE $I4L_L2
+
+	# the  layer-3 protocol:
+	isdnctrl l3_prot $SLAVE $I4L_L3
+
+	# encapsulation
+	isdnctrl encap $SLAVE $I4L_ENCAP
+
+	# secure?, on = only defined numbers are allowed to call in
+	isdnctrl secure $SLAVE $I4L_SECURE
+
+	# on demand (SV)
+	isdnctrl dialmode $SLAVE $I4L_DIALMODE_SLAVE
+
+	# automatic hangup if idle:
+	isdnctrl huptimeout $SLAVE ${I4L_IDLETIME}
+
+	# hangup before  next  charge  info?
+	isdnctrl chargehup $SLAVE $I4L_CHARGEHUP
+
+	# set the number of dial atempts for each number
+	test -z "$I4L_DIALMAX" ||
+	    isdnctrl dialmax $SLAVE $I4L_DIALMAX
+
+	# callback features
+	isdnctrl callback $SLAVE $I4L_CALLBACK
+	isdnctrl cbdelay $SLAVE $I4L_CBDELAY
+	isdnctrl cbhup $SLAVE $I4L_CBHUP
+
+fi
+
+
+echo -n "Configuring IP device $DEVICE" 
+
+IFARG=" $DEVICE" 
+
+if [ -n "$IPADDR" ]; then 
+	IFARG="$IFARG $IPADDR"
+else 	IFARG="$IFARG 0.0.0.0"	; fi
+if [ -n "$REMOTEADDR" ]; then
+	IFARG="$IFARG pointopoint $REMOTEADDR"
+else 	IFARG="$IFARG pointopoint 0.0.0.0" ; fi
+if [ -n "$NETMASK" ]; then
+	IFARG="$IFARG netmask $NETMASK" ; fi
+if [ -n "$BROADCAST" ]; then
+	IFARG="$IFARG -arp broadcast $BROADCAST"
+else 	IFARG="$IFARG -arp -broadcast" ; fi
+
+# echo "$IFARG"
+
+ifconfig $IFARG
+
+echo
+# start ppp-daemon if needed
+
+pppdpid=`ps axww|grep -v grep|grep $DEVICE|awk '{print $1}'`
+
+if [ -z "$pppdid" ] ; then
+
+	if [ -n "$I4L_USERNAME" ]; then
+		I4L_PPPOPTIONS="$I4L_PPPOPTIONS user $I4L_USERNAME"	
+	fi
+	if [ -n "$I4L_SYSNAME" ]; then
+		I4L_PPPOPTIONS="$I4L_PPPOPTIONS remotename $I4L_SYSNAME"
+	fi
+	if [ -n "$I4L_LOCALNAME" ]; then 
+		I4L_PPPOPTIONS="$I4L_PPPOPTIONS name $I4L_LOCALNAME"
+	fi
+
+	echo -n "Starting PPP-daemon for $DEVICE"
+   if [ -n "$SLAVE" ]; then
+	ipppd \
+	ipparam $DEVICE \
+	${I4L_PPPOPTIONS} +mp \
+	/dev/${DEVICE} /dev/${SLAVE} &
+	echo
+   else
+	ipppd /dev/${DEVICE} \
+	ipparam $DEVICE \
+	${I4L_PPPOPTIONS}&
+	echo
+   fi
+fi
+
+# Bind ppp device?
+if [ -n "$I4L_PPPBIND" ] ; then
+	echo -n "Binding PPP device: "
+	if [ "$I4L_PPPBIND" = "yes" ]; then
+		isdnctrl pppbind $DEVICE		
+		if [ -n "$SLAVE" ] ; then
+			echo -n "Binding PPP device: "
+			isdnctrl pppbind $SLAVE
+		fi
+	elif [ "$I4L_PPPBIND" != "no" ]; then
+		isdnctrl pppbind $DEVICE $I4L_PPPBIND
+		if [ -n "SLAVE" ] ; then
+			echo -n "Binding PPP device: "
+			isdnctrl pppbind $SLAVE
+		fi
+	fi
+fi
+
+# Load device specific TimRu's
+if [ -x "$I4L_TIMRUDIR/$DEVICE" ]; then
+	echo -n "Setting up TimRu on device $DEVICE"
+	. "$I4L_TIMRUDIR/$DEVICE"
+	echo
+fi
+
+# Load i4l budget extension configuration
+if [ -f "$I4L_BUDGETDIR/$DEVICE" ]; then
+	echo -n "Restoring budget for device $DEVICE"
+	isdnctrl restorebudgets $DEVICE `cat $I4L_BUDGETDIR/$DEVICE`
+	echo 
+fi
+
+# Run the distribution's ifup-post script
+
+echo -n "Final SysV network setup for $DEVICE"
+/etc/sysconfig/network-scripts/ifup-post $CONFIG
+echo
+
+exit 0

@@ -1,0 +1,20 @@
+# ## ISDN Network settings
+
+# name of master device
+DEVICE="isdn0"
+
+# my ip address
+IPADDR="192.168.99.1"
+
+# remote ip address
+REMOTEADDR="192.168.99.2"
+
+# Remote netmask
+NETMASK="255.255.255.0"
+
+# Bootmode
+ONBOOT="no"
+
+# Firmware to load
+FIRMWARE=""
+

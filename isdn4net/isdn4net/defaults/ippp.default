@@ -1,0 +1,119 @@
+#
+# Default settings for IPPP
+# Put common settings here, and special settings in the profile files
+#
+#### ISDN Config settings
+
+# Config name
+I4L_PROFILENAME="IPPP-Default"
+
+### ISDN Device settings
+
+# name of master device
+DEVICE="ippp0"
+
+# name of slave device for multilink ppp
+# SLAVE=slave0
+
+# Bootmode
+ONBOOT="no"
+
+### ISDN PPP settings
+
+# Remote username 
+#I4L_USERNAME="linuxlogin"
+
+# Remote systemname
+#I4L_SYSNAME="linuxisp"
+
+# Local systemname
+#I4L_LOCALNAME="linuxbox"
+
+# PPPoptions
+I4L_PPPOPTIONS="noipdefault ipcp-accept-local ipcp-accept-remote -vj -bsdcomp noccp"
+
+# PPPBind
+I4L_PPPBIND="yes"
+
+### ISDN phone settings
+
+# my phone number
+#I4L_LOCALMSN="33333333"
+
+# remote station phone numbers dialout ("111111 222222 333333")
+#I4L_REMOTE_OUT="11111111 22222222"
+
+# remote station phone numbers dialin ("2222222 1111111 333333")
+#I4L_REMOTE_IN="1111111 2222222"
+
+### ISDN link settings
+
+# Ondemand dialmode ("off" "manual" "auto")
+I4L_DIALMODE="manual"
+
+# dialmode for SLAVE ("off" "manual" "auto") (usually auto, as recommended by i4l FAQ)
+I4L_DIALMODE_SLAVE="auto"
+
+# Ondemand idletime before hangup (in seconds)
+I4L_IDLETIME=180
+
+# hangup befor next charge info ("on" or "off")
+# this only works, if your isdn-provider transmits the charge-info during
+# and after the connection
+# it does NOT work with the Teles on an EDSS1-Line :-(
+I4L_CHARGEHUP=off
+
+# hang-up-timer for incoming calls ("on" or "off")
+I4L_IHUP=off
+
+# Set the number of dial atempts for each number
+# set to "" for unlimited
+I4L_DIALMAX=3
+
+# secure
+# "on"  = only defined numbers are allowed to call in
+# "off" = all numbers are allowed to call in
+I4L_SECURE="on"
+
+# callback ("on", "off", "in" or "out")
+# the other host must accept this
+I4L_CALLBACK="off"
+
+# callback delay in seconds (default: 5)
+I4L_CBDELAY=5
+
+# activ hangup when getting an incoming call (default: "on")
+I4L_CBHUP="off"
+
+### ISDN protocol settings
+
+# layer-2 protocol (default: "hdlc")
+# With the ICN-driver and the Teles-driver, "x75i" and "hdlc" is available.
+# With other drivers, "x75ui", "x75bui" may be possible too
+I4L_L2="hdlc"
+
+# layer-3 protocol (only "trans" is allowed)
+I4L_L3="trans"
+
+# encapsulation
+# possible values: "rawip" (default), "ip", "cisco-h", "ethernet",
+# "syncppp", "uihdlc"
+# see: /usr/src/linux/Documentation/isdn/README
+I4L_ENCAP="syncppp"
+
+### ISDN Network settings
+
+# my ip address
+#IPADDR="192.168.100.1"
+
+# remote ip address
+#REMOTEADDR="192.168.100.2"
+
+# Remote netmask
+#NETMASK="255.255.255.0"
+
+# Remote networkaddress
+#NETWORK="192.168.100.0"
+
+# Remote broadcast
+#BROADCAST="192.168.100.255"

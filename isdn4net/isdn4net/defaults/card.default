@@ -1,0 +1,94 @@
+#
+# /etc/sysconfig/isdn
+#
+# Called by /etc/rc.d/init.d/isdn4linux
+# Called by /etc/sysconfig/network-scripts/ifup-ippp 
+#
+### ISDN CARD #######
+
+# driver-id for ISDN-card
+
+I4L_ID="ISDNcard"
+
+# 2. id-string for ICN ISDN-card
+
+# I4L_ID2="ICN2"
+
+# Hisax Debug Level, 4 (some..) to 31 (all messages)
+
+# I4L_DEBUG=4
+
+# kernel module to use (teles, hisax, icn, pcbit)
+#I4L_MODULE="hisax"
+ 
+# D-channel protocol 1=1TR6, 2=EDSS1(Euro-ISDN) for Teles/HiSax
+
+#I4L_PROTOCOL=2
+
+# type of HiSax-driver (set to '' for using old teles-modul or within kernel)
+# See below for list of values
+
+#I4L_TYPE=3
+
+# IRQ of Teles/HiSax Card
+#   eg. 12 or 15 when loading as module
+#   set to "" when driver is loaded within kernel
+
+#I4L_IRQ="10"
+
+# Membase of Teles/HiSax card (e.g. '0xd2000' for Teles S0/16,
+#	'0' for Teles S0/16.3)
+
+#I4L_MEMBASE="0"
+
+# Portaddress of Teles/HiSax card (e.g. 0xd80, "0" for S0/8)
+
+#I4L_PORT="0xd80"
+
+# for Creatix PNP: IO0 (ISAC)
+
+#I4L_IO0=''
+
+# for Creatix PNP: IO1 (HSCX)
+
+#I4L_IO1=''
+
+# I4L_TYPE: Card types (info from README.hisax):
+#
+#    Type                Required parameters (in addition to type and protocol)
+#
+#    0   simple 'modprobe hisax'  all options taken from /etc/conf.modules
+#    1   Teles 16.0               irq, mem, io
+#    2   Teles  8.0               irq, mem
+#    3   Teles 16.3 (non PnP)     irq, io
+#    4   Creatix/Teles PnP        irq, io0 (ISAC), io1 (HSCX)
+#    5   AVM A1 (Fritz)           irq, io
+#    6   ELSA PCC/PCF cards       io or nothing for autodetect (the iobase is
+#                                 required only if you have more than one ELSA
+#                                 card in your PC)
+#    7   ELSA Quickstep 1000      irq, io  (from isapnp setup)
+#    8   Teles 16.3 PCMCIA     	 irq, io
+#    9   ITK ix1-micro Rev.2      irq, io
+#   10   ELSA PCMCIA		 irq, io  (set with card manager)
+#   11   Eicon.Diehl Diva ISA PnP irq, io
+#   11   Eicon.Diehl Diva PCI     no parameter
+#   12   ASUS COM ISDNLink        irq, io  (from isapnp setup)
+#   13   HFC-2BS0 based cards     irq, io
+#   14   Teles 16.3c PnP          irq, io
+#   15   Sedlbauer Speed Card     irq, io
+#   15   Sedlbauer PC/104         irq, io
+#   15   Sedlbauer Speed PCI	 no parameter
+#   16   USR Sportster internal   irq, io
+#   17   MIC card                 irq, io
+#   18   ELSA Quickstep 1000PCI   no parameter
+#   19   Compaq ISDN S0 ISA card  irq, io0, io1, io (from isapnp setup io=IO2)
+#   20   NETjet PCI card          no parameter
+#   21   Teles PCI                no parameter
+#   22   Sedlbauer Speed Star (PCMCIA) irq, io (set with card manager)
+#   24   Dr. Neuhaus Niccy PnP    irq, io0, io1 (from isapnp setup)
+#   24   Dr. Neuhaus Niccy PCI    no parameter
+#   25   Teles S0Box              irq, io (of the used lpt port)
+#   26   AVM A1 PCMCIA (Fritz!)   irq, io (set with card manager)
+#   27   AVM PnP (Fritz!PnP)      irq, io  (from isapnp setup)
+#   27   AVM PCI (Fritz!PCI)      no parameter
+#   28   Sedlbauer Speed Fax+     irq, io (from isapnp setup)

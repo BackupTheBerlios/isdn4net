@@ -1,0 +1,17 @@
+#!/bin/sh
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin 
+
+CONFIG=$1
+
+. $CONFIG
+
+echo -n "Shutting down ISDN device $DEVICE ..." 
+ifconfig $DEVICE down
+echo
+
+echo -n "Removing device $DEVICE ..."
+isdnctrl delif $DEVICE
+
+echo "ISDN $device down!"
+

@@ -1,0 +1,45 @@
+#!/bin/sh
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin 
+
+CONFIG=$1
+
+. $CONFIG
+
+# Source ISDN configuration, if available
+if [ -f /etc/sysconfig/isdn ] ; then
+	. /etc/sysconfig/isdn
+fi
+
+if [ -f "$I4L_BUDGETDIR/$DEVICE" ] ; then
+	echo -n "Saving budget for $DEVICE"
+	isdnctrl savebudgets $DEVICE > "$I4L_BUDGETDIR/$DEVICE"
+	echo 
+fi
+
+echo -n "Shutting down ifconfig for $DEVICE" 
+ifconfig $DEVICE down
+echo "."
+
+echo -n "Removing device "
+isdnctrl delif $DEVICE
+
+echo -n "Stopping ipppd "
+# Simple ipppd kill
+#pppdpid=`ps axww|grep -v grep|grep $DEVICE|awk '{print $1}'` 
+pppdpid=`cat /var/run/ipppd.$DEVICE.pid`
+kill -9 $pppdpid > /dev/null 2>&1
+echo "."
+
+# Original pppd kill
+#pppdpid=`ps axww|grep -v grep|grep ipppd|awk '{print $1}'`
+#cat /proc/net/dev | grep ippp >& /dev/null
+#if [ $? -ne 0 -a -n "$pppdpid" ] ; then
+#    kill -9 $pppdpid > /dev/null 2>&1
+#fi
+
+echo "ISDN $device down!"
+
+
+
+

@@ -1,0 +1,62 @@
+isdn4net
+--------
+
+1.4.1
+
+- nasty error if netmask not set removed.
+- removed genereal isdndocs to separate package. 
+- fixed isdnadmin generated config bug
+
+1.4.0
+
+- Should be compatibel with isdn4net 1.0 configfiles again
+- Card and link profiles split in different directorys
+- Small config change in ippp.map
+- Large name and command syntax change in isdn, and more commands and fixes
+- More fixes in ifup scripts
+- Can be used together with isdnadmin, a linuxconf module for X11,WWW,terminal.
+
+1.3.2
+
+- fixed bug with path and pci cards in init script (isdn4linux)
+- small fixes to sh admin tool (i4n) 
+- small fixes in if scripts (ifup/down-ippp/isdn)
+
+1.3.1 
+
+- included docs from kernel source and isdn4linux
+- sh configuration utility (i4n)
+- isdnX devices work (ifup-isdn) 
+
+1.3:
+
+- New profile map /etc/isdn/profile/ippp.map
+- Profiles for card settings
+- First time installation improved
+- Norwegian help file
+
+1.2: 
+
+- New "profile" directory/system (/etc/isdn/profile)
+
+1.1:
+
+Some rewriting by Stein Vråle <stein@terminator.net>:
+
+- "Repacked" the RPM to make it more managable.
+- Added support for isdn4k-utils 3.0b2/linux 2.0.36 
+- Support for isdnctrl verbose config
+- Support for PPPbind option
+- Changed the PPPoptions stuff for more flexible configuration:
+	- Possible to add extra pppoptions without using ppp/ioption
+	- Possible to use multiuser dialin mode
+- Rewrite of phonenumber option, supporting up to 5 numbers in one variable.
+- Restructure of config options, mostly changed options on top
+- Updated isdn cardconfig support 22 more cards from Hisax 3.1/Kernel 2.0.36
+- Created more sample ippp and card configs (not tested very well)
+
+1-1: 
+
+This was the original isdn4net package, packed (and maybe written) in late 1997 by 
+J"org Lehrke <jlehrke@ecrc.de>. No more info available, but the SRPM file is
+available on most Linux FTP archives.

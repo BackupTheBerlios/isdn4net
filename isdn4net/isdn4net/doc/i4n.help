@@ -1,0 +1,57 @@
+HELP on isdn - a simple frontend for ISDN4NET
+-------------------------------------------
+
+INTRO
+
+This is a tin simpley front-end for the ISDN4NET package.
+
+ISDN4NET is a collection of scripts and configuration files
+for use with isdn4linux.
+
+Please note that this frontend is under development:
+	* It may break your existing configuration files.
+	* Some isdn4net config variables are not implemented and may be lost.
+
+SEE ALSO: http://www.terminator.net/isdn4net/
+
+SYNTAX: 
+
+isdn [subsys] [command] <target>
+
+WHERE
+
+sybsys =
+
+	system 	- global configuration
+	card	- card profile
+	link	- link profile (ISP)
+	net		- network profile		
+	help	- this help page
+	hisax   - help on HiSax cards
+
+command =
+
+	setup	- configure a part configuration file
+	start	- start the given part of the system
+	stop	- stop the given part of the system
+	restart - restart the given part of the system
+	list 	- available profiles
+
+target	=
+	
+	profilename or device
+
+EXAMPLES:
+
+isdn link setup myisp		- Setup a ISP profile
+isdn card setup mycard   	- Setup a card configuration
+isdn system setup 			- Setup global settings
+isdn setup					- Configure all parts (first time)
+isdn system restart			- Unload and load card module
+isdn system start			- Load card module
+isdn net start ippp0		- Load the ippp0 net device
+isdn net stop ippp0			- Unload ippp0 net device
+
+NOTES:
+
+Please report bugs or send comments to: Stein Vrale <stein@terminator.net>

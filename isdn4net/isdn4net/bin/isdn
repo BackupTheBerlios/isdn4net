@@ -1,0 +1,352 @@
+#!/bin/sh
+#
+# Scriptname: isdn
+# Version: 1.4.2
+# Author: Stein Vråle <stein@terminator.net>
+#
+# ISDN admin utility for the isdn4net-1.4 conf files
+#
+# arg1 = subsys
+# arg2 = command
+# arg3 = target
+
+function notdone()
+{
+echo "Sorry, this function is not implemented yet!"
+}
+
+function help ()
+{
+	HELPDIR="/usr/share/doc/`ls /usr/share/doc | grep isdn4net | awk ' { print $1 } '`"
+	less "${HELPDIR}/doc/i4n.help"
+}
+
+function yesno ()
+{
+# $1 Prompt
+
+RET="A"
+
+while [ "$RET" = "A" ] ; do
+	echo -n "$1 "
+	read
+	if [ "$REPLY" = "" ] ; then REPLY="A" ; fi 
+	if [ "$REPLY" = "yes" ] || [ $REPLY = "y" ] ; then RET="0" ; fi
+	if [ "$REPLY" = "no" ] ||  [ $REPLY = "n" ] ; then RET="1" ; fi
+done
+return $RET
+
+}
+
+# Defaults
+CARD_PROFILE_DIR="/etc/isdn/profile/card"
+DIAL_PROFILE_DIR="/etc/isdn/profile/link"
+CARD_PROFILE="mycard"
+DIAL_PROFILE="myisp"
+SYS_CONFIG="/etc/sysconfig/isdn"
+
+# Arguments
+TARGET=$3
+COMMAND=$2
+SUBSYS=$1
+
+case "$SUBSYS" in
+
+system)
+	case "$COMMAND" in
+	start)
+		/etc/rc.d/init.d/isdn4linux start	
+	;;
+	stop)
+		/etc/rc.d/init.d/isdn4linux stop
+	;;
+	restart)
+		/etc/rc.d/init.d/isdn4linux restart
+	;; 
+	setup)
+		echo
+		echo "ISDN4NET SYSTEM setup"
+		# Read system configuration
+		. "$SYS_CONFIG"
+		echo    "Filename                 $SYS_CONFIG"
+		echo -n "Start system (yes/no)    [$I4L_START] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_START=$REPLY ; fi
+		echo -n "Start isdnlog (yes/no)   [$I4L_ISDNLOG] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_ISDNLOG=$REPLY ; fi
+		echo -n "Start iprofd (yes/no)    [$I4L_IPROFD] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_IPROFD=$REPLY ; fi
+		echo -n "hisax debug (0-30?)      [$I4L_DEBUG] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_DEBUG=$REPLY ; fi
+		echo -n "isdnctrl verbose (0-10?) [$I4L_VERBOSE] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_VERBOSE=$REPLY ; fi
+		echo -n "Use card (profilename)   [$I4L_CARD] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_CARD=$REPLY ; fi
+		echo -n "Profiledir (path)        [$I4L_PROFILEDIR] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_PROFILEDIR=$REPLY ; fi
+	 	echo -n "Default protocol         [$I4L_PROTOCOL] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_PROTOCOL=$REPLY ; fi
+		echo -n "Dynamic rerouting        [$I4L_DYN] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_DYN=$REPLY ; fi
+	
+		#Confirm
+		echo
+		echo "These are the entered values:"
+		echo "Start system      [$I4L_START] "
+		echo "Start isdnlog     [$I4L_ISDNLOG] "
+		echo "Start iprofd      [$I4L_IPROFD] "
+		echo "hisax debug       [$I4L_DEBUG] "
+		echo "isdnctrl verbose  [$I4L_VERBOSE] "
+		echo "Use card          [$I4L_CARD] "
+		echo "Profile dir       [$I4L_PROFILEDIR] "
+		echo "Default protocol  [$I4L_PROTOCOL] "
+		echo "Dynamic rerouting [$I4L_DYN] "
+
+		if ! yesno "OK to save? (yes/no) " ; then exit ; fi
+		# Write
+		echo "Saving old config:"
+		cp -fv "$SYS_CONFIG" "$SYS_CONFIG.bak"
+		echo "I4L_START=\"$I4L_START\" " > "$SYS_CONFIG"
+		echo "I4L_ISDNLOG=\"$I4L_ISDNLOG\" " >> "$SYS_CONFIG"
+		echo "I4L_IPROFD=\"$I4L_IPROFD\" " >> "$SYS_CONFIG"
+		echo "I4L_DEBUG=\"$I4L_DEBUG\" " >> "$SYS_CONFIG"
+		echo "I4L_VERBOSE=\"$I4L_VERBOSE\" " >> "$SYS_CONFIG" 
+		echo "I4L_CARD=\"$I4L_CARD\" " >> "$SYS_CONFIG"
+		echo "I4L_PROFILEDIR=\"$I4L_PROFILEDIR\" " >> "$SYS_CONFIG"
+		echo "I4L_PROTOCOL=\"$I4L_PROTOCOL\" " >> "$SYS_CONFIG"
+		echo "I4L_TIMRUDIR=\"$I4L_TIMRUDIR\" " >> "$SYS_CONFIG"
+		echo "I4L_BUDGETDIR=\"$I4L_BUDGETDIR\" " >> "$SYS_CONFIG"
+		echo "I4L_DYN=\"$I4L_DYN\" " >> "$SYS_CONFIG"
+		echo "System profile saved!"
+	;;
+
+	*)
+		help
+		exit
+	;;	
+
+	esac
+;;
+
+card)
+	case "$COMMAND" in 
+	setup)
+		echo
+		echo "ISDN4NET CARD setup"
+		if [ -n "$TARGET" ] ; then CARD_PROFILE=$TARGET ; fi
+		if [ ! -e "$CARD_PROFILE_DIR/$CARD_PROFILE" ] ; then 
+			echo "New profile"
+		else
+			# Read card configuration
+			. "$CARD_PROFILE_DIR/$CARD_PROFILE"
+		fi
+		echo "Filename   $CARD_PROFILE"
+		echo "If you don't know your cardtype or required parameters you can see the list of supported HiSax cards"
+		if yesno "Do you want to see the HiSax list? (yes/no) " ; then $0 hisax ; fi
+		# Setup
+		echo "Enter your values, hit enter to accept defaults in brackets:"
+		echo -n "Card ID [$I4L_ID] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_ID=$REPLY ; fi
+		echo -n "Module  [$I4L_MODULE] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_MODULE=$REPLY ; fi
+		echo -n "Type    [$I4L_TYPE] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_TYPE=$REPLY ; fi
+		echo -n "IRQ     [$I4L_IRQ] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_IRQ=$REPLY ; fi
+		echo -n "IO      [$I4L_PORT] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_PORT=$REPLY ; fi
+#		echo -n "MEM     [$I4L_MEMBASE] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_MEMBASE=$REPLY ; fi
+		#Confirm
+		echo
+		echo "These are the entered values:"
+		echo "Card ID [$I4L_ID] "
+		echo "Module  [$I4L_MODULE] "
+		echo "Type    [$I4L_TYPE] "
+		echo "IRQ     [$I4L_IRQ] "
+		echo "IO      [$I4L_PORT] "
+#		echo "MEM     [$I4L_MEMBASE] "
+		if ! yesno "OK to save? (yes/no) " ; then exit ; fi    
+		# Write
+		echo "Saving old config:"
+		cp -fv "$CARD_PROFILE_DIR/$CARD_PROFILE" "$CARD_PROFILE_DIR/$CARD_PROFILE.bak"
+		echo "I4L_ID=\"$I4L_ID\" " > "$CARD_PROFILE_DIR/$CARD_PROFILE"
+		echo "I4L_MODULE=\"$I4L_MODULE\" " >> "$CARD_PROFILE_DIR/$CARD_PROFILE"
+		echo "I4L_TYPE=\"$I4L_TYPE\" " >> "$CARD_PROFILE_DIR/$CARD_PROFILE"
+		echo "I4L_IRQ=\"$I4L_IRQ\" " >> "$CARD_PROFILE_DIR/$CARD_PROFILE"
+		echo "I4L_PORT=\"$I4L_PORT\" " >> "$CARD_PROFILE_DIR/$CARD_PROFILE" 
+		echo "I4L_MEMBASE=\"$I4L_MEMBASE\" " >> "$CARD_PROFILE_DIR/$CARD_PROFILE"
+		echo "Card profile $CARD_PROFILE saved!"
+	;;
+	
+	*)
+		help
+		exit
+	;;
+
+	esac
+
+;;
+
+link)
+	case "$COMMAND" in
+	
+	setup)
+		echo
+		echo "ISDN4NET LINK setup"
+		# Check name argument
+		if [ -n "$TARGET" ] ; then DIAL_PROFILE=$TARGET ; fi
+		# Read isp configuration
+		if [ ! -e "$DIAL_PROFILE_DIR/$DIAL_PROFILE" ] ; then 
+			echo "New profile"
+		else
+			. "$DIAL_PROFILE_DIR/$DIAL_PROFILE"
+		fi
+		echo "Filename              $DIAL_PROFILE"
+		echo -n "Profile name       [$I4L_PROFILENAME] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_PROFILENAME=$REPLY ; fi
+		echo -n "Remote login name  [$I4L_USERNAME] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_USERNAME=$REPLY ; fi
+		echo -n "Remote system name [$I4L_SYSNAME] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_SYSNAME=$REPLY ; fi
+		echo -n "Remote number(s)   [$I4L_REMOTE_OUT] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_REMOTE_OUT=$REPLY ; fi
+		echo -n "Ingoing number(s)  [$I4L_REMOTE_IN] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_REMOTE_IN=$REPLY ; fi
+		echo -n "Local number (MSN) [$I4L_LOCALMSN] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_LOCALMSN=$REPLY ; fi
+		echo -n "Security (on/off)  [$I4L_SECURE] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_SECURE=$REPLY ; fi
+		echo -n "Dial mode(off/manual/auto) [$I4L_DIALMODE] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_DIALMODE=$REPLY ; fi
+		echo -n "Slavedevice(for multilink) [$SLAVE] " ; read   ; if [  ! "$REPLY" = "" ] ; then SLAVE=$REPLY ; fi
+		echo -n "PPPoptions [$I4L_PPPOPTIONS] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_PPPOPTIONS=$REPLY ; fi
+		echo -n "PPPbind (yes/no)   [$I4L_PPPBIND] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_PPPBIND=$REPLY ; fi
+		#Confirm
+		echo
+		echo "These are the entered values:"
+		echo "Profile name     [$I4L_PROFILENAME] "
+		echo "Remote user      [$I4L_USERNAME] "
+		echo "Remote sysname   [$I4L_SYSNAME] "
+		echo "Remote number    [$I4L_REMOTE_OUT] "
+		echo "Incoming number  [$I4L_REMOTE_IN] "
+		echo "Local number     [$I4L_LOCALMSN] "
+		echo "Security         [$I4L_SECURE] "
+		echo "Dial mode        [$I4L_DIALMODE] "
+		echo "Slave device     [$SLAVE] "
+		echo "PPPOptions       [$I4L_PPPOPTIONS] "
+		echo "PPPbind          [$I4L_PPPBIND] "
+		if ! yesno "OK to save? (yes/no) " ; then exit ; fi
+		# Write
+		echo "Saving old config:"
+		cp -fv "$DIAL_PROFILE_DIR/$DIAL_PROFILE" "$DIAL_PROFILE_DIR/$DIAL_PROFILE.bak"
+		echo "I4L_PROFILENAME=\"$I4L_PROFILENAME\" " > "$DIAL_PROFILE_DIR/$DIAL_PROFILE"
+		echo "I4L_USERNAME=\"$I4L_USERNAME\" " >> "$DIAL_PROFILE_DIR/$DIAL_PROFILE"
+		echo "I4L_SYSNAME=\"$I4L_SYSNAME\" " >> "$DIAL_PROFILE_DIR/$DIAL_PROFILE"
+		echo "I4L_REMOTE_OUT=\"$I4L_REMOTE_OUT\" " >> "$DIAL_PROFILE_DIR/$DIAL_PROFILE"
+		echo "I4L_REMOTE_IN=\"$I4L_REMOTE_IN\" " >> "$DIAL_PROFILE_DIR/$DIAL_PROFILE" 
+		echo "I4L_LOCALMSN=\"$I4L_LOCALMSN\" " >> "$DIAL_PROFILE_DIR/$DIAL_PROFILE"
+		echo "I4L_SECURE=\"$I4L_SECURE\" " >> "$DIAL_PROFILE_DIR/$DIAL_PROFILE" 
+		echo "I4L_DIALMODE=\"$I4L_DIALMODE\" " >> "$DIAL_PROFILE_DIR/$DIAL_PROFILE"
+		echo "SLAVE=\"$SLAVE\" " >> "$DIAL_PROFILE_DIR/$DIAL_PROFILE"
+		echo "I4L_PPPOPTIONS=\"$I4L_PPPOPTIONS\" " >> "$DIAL_PROFILE_DIR/$DIAL_PROFILE" 
+		echo "I4L_PPPBIND=\"$I4L_PPPBIND\" " >> "$DIAL_PROFILE_DIR/$DIAL_PROFILE"
+		echo "Link profile $DIALPROFILE saved!"
+		echo "You must also update /etc/ppp/{pap|chap}-secrets" 
+	;;
+
+	list) 
+
+		ls $DIAL_PROFILE_DIR		
+	;;
+
+	*)
+		help
+		exit
+	;;
+
+	esac
+;;
+
+net)
+	case "$COMMAND" in
+
+	start)
+		ifup $TARGET
+	;;
+	stop)
+		ifdown $TARGET
+	;;
+	restart)
+		ifdown $TARGET
+		ifup $TARGET
+	;;
+
+	list) 
+		ls /etc/sysconfig/network-scripts/ifcfg-i*
+
+	;;
+
+	*)
+		help
+		exit
+	;;
+
+	esac
+;;
+
+setup)
+	echo "ISDN4NET Setting up everything"
+	echo
+	echo "Please note: This setup utility is under development - use at your own risk"
+	echo "If you don't have an existing isdn4net configuration this utility will NOT do any harm."
+	echo "If you have variables in your setup not known to this script they will be lost"
+	echo "If you have comments in your current setup they will be lost."
+	echo "If you have a PnP ISA card you must prepare PnP (isapnp) before you can continue with isdn setup"
+	echo "Currently this utility can NOT setup PAP/CHAP, PnP, routing, ondemand, IP setup"
+	echo  
+	if ! yesno "Do you want to continue? (yes/no) " ; then exit ; fi
+	$0 card setup
+	$0 link setup
+	$0 system setup
+	echo
+	echo "All done!"
+	
+;;
+
+start)
+	$0 system start
+;;
+
+stop)
+	$0 system stop
+;;
+
+restart)
+	$0 system restart
+;;
+
+up)
+	ifup $2
+;;
+
+down)
+	ifdown $2
+;;
+
+dial)
+	isdnctrl dial $2
+;;
+
+hangup) 
+	isdnctrl hangup $2
+;;
+
+auto)
+	isdnctrl dialmode $2 auto
+;;
+
+manual)
+	isdnctrl dialmode $2 manual
+;;
+
+off)
+	isdnctrl dialmode $2 off
+;;
+
+
+--help)	help ;;
+
+help) help ;;
+
+--version) echo "isdn version 0.4 - an isdn admin utility for the isdn4net package" ;;
+
+hisax)
+	HELPDIR="/usr/share/doc/`ls /usr/share/doc | grep isdn4net | awk ' { print $1 } '`"
+	less "${HELPDIR}/doc/hisax.help"
+;;
+
+
+*)
+	echo 'usage: isdn {system|card|link|net} {start|stop|restart|setup} {target}'
+	echo 'Try `isdn --help´ for more info'
+;;
+esac
+
+exit

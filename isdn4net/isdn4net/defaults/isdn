@@ -1,0 +1,61 @@
+#
+# /etc/sysconfig/isdn
+#
+# Called by /etc/rc.d/init.d/isdn4linux
+# Called by /etc/sysconfig/network-scripts/ifup-ippp 
+#
+##
+### ISDN SYSTEM ######
+#
+
+# Set PATH info here, and make sure all scripts sources this file
+
+PATH="/sbin:/usr/sbin:/bin/:/usr/bin"
+
+# Start isdn4linux? ("yes" or "no")
+
+I4L_START="yes"
+
+# Start iprofd ("yes" or "no")
+# (re-)store ISDN-modem setup in /etc/isdnlog/modemsettings
+# restore automatically at boot-time
+# store with "AT&W0" in terminal-emulation
+
+I4L_IPROFD="yes"
+
+# Start isdnlog ("yes" or "no")
+# enable isdnlog only after setting up my_isdnlog.conf in /etc/isdn
+
+I4L_ISDNLOG="no"
+
+# Hisax Debug Level, 4 (some..) to 31 (all messages)
+
+I4L_DEBUG=4
+
+# ISDNCTRL verbose level
+
+I4L_VERBOSE=2
+
+# Directory for isdn4net profiles
+
+I4L_PROFILEDIR="/etc/isdn/profile"
+
+# Directory for budget files
+
+I4L_BUDGETDIR="/etc/isdn/budgets"
+
+# Directory for timru files
+
+I4L_TIMRUDIR="/etc/isdn/timru"
+
+# D-channel protocol 1=1TR6, 2=EDSS1(Euro-ISDN) for Teles/HiSax
+
+I4L_PROTOCOL=2
+
+# ISDN CARD config to load
+
+I4L_CARD="mycard"
+
+# Dynamic rewrite of outgoing TCP on open, 0=off 1=on 2=verbose
+I4L_DYN=2
+

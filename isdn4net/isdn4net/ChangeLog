@@ -1,0 +1,65 @@
+2000-08-28  Stein Vråle  <stein@terminator.net>
+
+	* Release 1.4.5
+
+2000-08-28  Stein Vråle  <stein@terminator.net>
+
+	* init.d/isdn4linux: 
+	Will now try with PCI mode card instead of exiting.
+	Moved dynamic rerouting so it will only be done on start.
+	Added some new card.
+
+2000-07-27
+
+	* Relase 1.4.4
+
+	Added COPYING (GNU Public License) to package.
+
+2000-07-27
+
+	Added patch from Juergen Hammelmann <juergen.hammelmann@mathematik.uni-stuttgart.de>, 
+	to fix problem with isdnlog starting before isdn devices is up. Fixed by moving 
+	isdnlog control from isdn4linux script to a separate isdnlog initscript, to be started 
+	after the network init script has finished setting up devices.
+
+2000-06-25
+
+	Fixed problem with ifdown-ippp killing itself, with help from Jens Rathmann <rathmann@uni.de>.
+
+2000-02-22
+
+	Added patch from Jesse Kuang <kjx@poboxes.com> to make the 'isdn' script bash3 compatibel.
+	
+1999-11-22
+	
+	* Relase 1.4.3
+
+	Added patch from Rasmus Andersson <rasmus@pole-position.org> which
+	fix MPPP and I4L_DYN.
+	
+1999-11-10
+
+	* Releasing 1.4.2:
+	
+	Added patch from Achim Steinmetz <as@ibm.net>, which gives:
+	- timru file support
+	- budget file support
+	- cardtype 0 means card info in /etc/conf.modules (good idea!)
+	- isdnlog.conf sample with comments.
+	- other small fixes in the scripts.
+
+	Small fixes and improvments in the 'isdn' config utility.
+	Removed some outdated docs.
+	Added support for dynamic kernel rerouting.
+
+1999-10-12    <stein@terminator.net>
+
+	* doc/i4n.help: Some updates to the help page.
+
+
+1999-08-20    <stein@terminator.net>
+
+	* network-scripts/ifup-ippp: Added MPPP patch recived from Jesse Kuang <kjx@poboxes.com>. Now easy to setup multi line!
+
+	* init.d/isdn4linux: Fixed chkconfig runlevel so isdn4linux will load card modules before the network loads.
+
