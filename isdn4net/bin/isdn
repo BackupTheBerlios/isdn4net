@@ -1,8 +1,9 @@
 #!/bin/sh
 #
 # Scriptname: isdn
-# Version: 1.4.2
-# Author: Stein Vråle <stein@terminator.net>
+# Version: 1.4.6 
+# Author: Steffen Barszus <st_barszus@gmx.de>
+# Author: Stein Vråle <stein@terminator.net> - not active anymore
 #
 # ISDN admin utility for the isdn4net-1.4 conf files
 #
@@ -69,15 +70,32 @@ system)
 		# Read system configuration
 		. "$SYS_CONFIG"
 		echo    "Filename                 $SYS_CONFIG"
-		echo -n "Start system (yes/no)    [$I4L_START] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_START=$REPLY ; fi
-		echo -n "Start isdnlog (yes/no)   [$I4L_ISDNLOG] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_ISDNLOG=$REPLY ; fi
-		echo -n "Start iprofd (yes/no)    [$I4L_IPROFD] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_IPROFD=$REPLY ; fi
-		echo -n "hisax debug (0-30?)      [$I4L_DEBUG] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_DEBUG=$REPLY ; fi
-		echo -n "isdnctrl verbose (0-10?) [$I4L_VERBOSE] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_VERBOSE=$REPLY ; fi
-		echo -n "Use card (profilename)   [$I4L_CARD] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_CARD=$REPLY ; fi
-		echo -n "Profiledir (path)        [$I4L_PROFILEDIR] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_PROFILEDIR=$REPLY ; fi
-	 	echo -n "Default protocol         [$I4L_PROTOCOL] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_PROTOCOL=$REPLY ; fi
-		echo -n "Dynamic rerouting        [$I4L_DYN] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_DYN=$REPLY ; fi
+		echo -n "Start system (yes/no)    [$I4L_START] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_START=$REPLY ; fi
+		  
+		echo -n "Start isdnlog (yes/no)   [$I4L_ISDNLOG] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_ISDNLOG=$REPLY ; fi
+		  
+		echo -n "Start iprofd (yes/no)    [$I4L_IPROFD] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_IPROFD=$REPLY ; fi
+		  
+		echo -n "hisax debug (0-30?)      [$I4L_DEBUG] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_DEBUG=$REPLY ; fi
+		  
+		echo -n "isdnctrl verbose (0-10?) [$I4L_VERBOSE] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_VERBOSE=$REPLY ; fi
+		  
+		echo -n "Use card (profilename)   [$I4L_CARD] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_CARD=$REPLY ; fi
+		  
+		echo -n "Profiledir (path)        [$I4L_PROFILEDIR] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_PROFILEDIR=$REPLY ; fi
+		  
+	 	echo -n "Default protocol         [$I4L_PROTOCOL] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_PROTOCOL=$REPLY ; fi
+		  
+		echo -n "Dynamic rerouting        [$I4L_DYN] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_DYN=$REPLY ; fi
 	
 		#Confirm
 		echo
@@ -120,6 +138,7 @@ system)
 
 card)
 	case "$COMMAND" in 
+	case "$COMMAND" in 
 	setup)
 		echo
 		echo "ISDN4NET CARD setup"
@@ -135,12 +154,23 @@ card)
 		if yesno "Do you want to see the HiSax list? (yes/no) " ; then $0 hisax ; fi
 		# Setup
 		echo "Enter your values, hit enter to accept defaults in brackets:"
-		echo -n "Card ID [$I4L_ID] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_ID=$REPLY ; fi
-		echo -n "Module  [$I4L_MODULE] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_MODULE=$REPLY ; fi
-		echo -n "Type    [$I4L_TYPE] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_TYPE=$REPLY ; fi
-		echo -n "IRQ     [$I4L_IRQ] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_IRQ=$REPLY ; fi
-		echo -n "IO      [$I4L_PORT] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_PORT=$REPLY ; fi
+		echo -n "Card ID [$I4L_ID] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_ID=$REPLY ; fi
+		  
+		echo -n "Module  [$I4L_MODULE] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_MODULE=$REPLY ; fi
+		  
+		echo -n "Type    [$I4L_TYPE] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_TYPE=$REPLY ; fi
+		  
+		echo -n "IRQ     [$I4L_IRQ] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_IRQ=$REPLY ; fi
+		  
+		echo -n "IO      [$I4L_PORT] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_PORT=$REPLY ; fi
+
 #		echo -n "MEM     [$I4L_MEMBASE] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_MEMBASE=$REPLY ; fi
+		
 		#Confirm
 		echo
 		echo "These are the entered values:"
@@ -151,6 +181,7 @@ card)
 		echo "IO      [$I4L_PORT] "
 #		echo "MEM     [$I4L_MEMBASE] "
 		if ! yesno "OK to save? (yes/no) " ; then exit ; fi    
+
 		# Write
 		echo "Saving old config:"
 		cp -fv "$CARD_PROFILE_DIR/$CARD_PROFILE" "$CARD_PROFILE_DIR/$CARD_PROFILE.bak"
@@ -187,20 +218,41 @@ link)
 			. "$DIAL_PROFILE_DIR/$DIAL_PROFILE"
 		fi
 		echo "Filename              $DIAL_PROFILE"
-		echo -n "Profile name       [$I4L_PROFILENAME] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_PROFILENAME=$REPLY ; fi
-		echo -n "Remote login name  [$I4L_USERNAME] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_USERNAME=$REPLY ; fi
-		echo -n "Remote system name [$I4L_SYSNAME] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_SYSNAME=$REPLY ; fi
-		echo -n "Remote number(s)   [$I4L_REMOTE_OUT] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_REMOTE_OUT=$REPLY ; fi
-		echo -n "Ingoing number(s)  [$I4L_REMOTE_IN] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_REMOTE_IN=$REPLY ; fi
-		echo -n "Local number (MSN) [$I4L_LOCALMSN] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_LOCALMSN=$REPLY ; fi
-		echo -n "Security (on/off)  [$I4L_SECURE] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_SECURE=$REPLY ; fi
-		echo -n "Dial mode(off/manual/auto) [$I4L_DIALMODE] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_DIALMODE=$REPLY ; fi
-		echo -n "Slavedevice(for multilink) [$SLAVE] " ; read   ; if [  ! "$REPLY" = "" ] ; then SLAVE=$REPLY ; fi
-		echo -n "PPPoptions [$I4L_PPPOPTIONS] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_PPPOPTIONS=$REPLY ; fi
-		echo -n "PPPbind (yes/no)   [$I4L_PPPBIND] " ; read   ; if [  ! "$REPLY" = "" ] ; then I4L_PPPBIND=$REPLY ; fi
+		echo -n "Profile name       [$I4L_PROFILENAME] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_PROFILENAME=$REPLY ; fi
+		  
+		echo -n "Remote login name  [$I4L_USERNAME] " ; read  
+		  if [  ! "$REPLY" = "" ] ; then I4L_USERNAME=$REPLY ; fi
+		  
+		echo -n "Remote system name [$I4L_SYSNAME] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_SYSNAME=$REPLY ; fi
+		  
+		echo -n "Remote number(s)   [$I4L_REMOTE_OUT] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_REMOTE_OUT=$REPLY ; fi
+		  
+		echo -n "Ingoing number(s)  [$I4L_REMOTE_IN] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_REMOTE_IN=$REPLY ; fi
+		  
+		echo -n "Local number (MSN) [$I4L_LOCALMSN] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_LOCALMSN=$REPLY ; fi
+		  
+		echo -n "Security (on/off)  [$I4L_SECURE] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_SECURE=$REPLY ; fi
+		  
+		echo -n "Dial mode(off/manual/auto) [$I4L_DIALMODE] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_DIALMODE=$REPLY ; fi
+		  
+		echo -n "Slavedevice(for multilink) [$SLAVE] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then SLAVE=$REPLY ; fi
+		  
+		echo -n "PPPoptions [$I4L_PPPOPTIONS] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_PPPOPTIONS=$REPLY ; fi
+		  
+		echo -n "PPPbind (yes/no)   [$I4L_PPPBIND] " ; read   
+		  if [  ! "$REPLY" = "" ] ; then I4L_PPPBIND=$REPLY ; fi
+		  
 		#Confirm
 		echo
-		echo "These are the entered values:"
 		echo "Profile name     [$I4L_PROFILENAME] "
 		echo "Remote user      [$I4L_USERNAME] "
 		echo "Remote sysname   [$I4L_SYSNAME] "
@@ -228,6 +280,11 @@ link)
 		echo "I4L_PPPOPTIONS=\"$I4L_PPPOPTIONS\" " >> "$DIAL_PROFILE_DIR/$DIAL_PROFILE" 
 		echo "I4L_PPPBIND=\"$I4L_PPPBIND\" " >> "$DIAL_PROFILE_DIR/$DIAL_PROFILE"
 		echo "Link profile $DIALPROFILE saved!"
+		for i in `grep * /etc/isdn/profile/link/*`; do 
+			a=`awk -F"=" '/DEVICE*/ {print $2}' /etc/isdn/profile/link/$i`
+			if [ -n "$a" ]; then echo $a=$i; fi
+		done
+		
 		echo "You must also update /etc/ppp/{pap|chap}-secrets" 
 	;;
 
@@ -345,7 +402,7 @@ hisax)
 
 *)
 	echo 'usage: isdn {system|card|link|net} {start|stop|restart|setup} {target}'
-	echo 'Try `isdn --help´ for more info'
+	echo 'Try `isdn --help for more info'
 ;;
 esac
 
