@@ -1,0 +1,26 @@
+SAMPLE CONFIG FILES
+isdn4net 1.3
+
+All samples for syncPPP.
+
+All testing done with:
+- RH 5.1
+- isdn4k-utils 3.0beta2
+- Linux 2.0.36
+- Teles16.3c
+
+SAMPLES:
+
+Cardsetup (replace /etc/isdn/profile/card/mycard):
+
+card/teles
+card/diva
+
+Profiles (replace /etc/isdn/profile/link/mysip):
+
+ippp/dynamic - ISP with dynamic IP
+ippp/fixed - ISP with fixed IP
+ippp/demand - On demand link
+ippp/net    - LocalNet <-> RemoteNet 
+ippp/dialin - Dialin server with auth from /etc/passwd
+ippp/mppp - MPPP Multilink (Channel bundling) (not working)

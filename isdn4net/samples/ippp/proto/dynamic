@@ -1,0 +1,35 @@
+#
+# IPPP Custom Profile
+# Overides values from ippp.default 
+
+# Profile name
+I4L_PROFILENAME="Dynamic IP"
+
+# Remote username
+I4L_USERNAME="linuxusr"
+
+# Remote systemname
+I4L_SYSNAME="linuxisp"
+
+# Local MSN number
+I4L_LOCALMSN="11223344" 
+
+# Remote phonenumbers for dialout ("111111 222222 333333")
+I4L_REMOTE_OUT="22334455 33445566"
+
+# Remote phonenumbers for secure dialin ("2222222 1111111 333333")
+I4L_REMOTE_IN=""
+
+# Ondemand dialmode ("off" "manual" "auto")
+I4L_DIALMODE="manual"
+
+# Secure
+# "on"  = only defined numbers are allowed to call in
+# "off" = all numbers are allowed to call in
+I4L_SECURE="on"
+
+# PPPoptions
+I4L_PPPOPTIONS="debug defaultroute noipdefault ipcp-accept-local ipcp-accept-remote -vj -bsdcomp"
+
+# PPPBind
+I4L_PPPBIND="yes"

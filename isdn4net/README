@@ -1,0 +1,12 @@
+This package has installed some sample ISDN4NET configuration files.
+Please edit the link and card profiles, they must be configured for your system!
+You may use /usr/local/bin/isdn to configure the files.
+
+Sample link profile installed as /etc/isdn/profile/link/myisp
+Sample card profile installed as /etc/isdn/profile/card/mycard
+Sample system profile installed as /etc/sysconfig/isdn
+Sample net profile installed as /etc/sysconfig/network-scripts/ifcfg-ippp0
+
+More info about isdn4net on http://www.terminator.net/isdn4net/
+
+Contact: Stein Vråle <stein@terminator.net>

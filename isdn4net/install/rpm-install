@@ -1,0 +1,46 @@
+#!/bin/sh
+
+# Install script files
+
+install -d $RPM_BUILD_ROOT/etc/sysconfig/network-scripts
+install network-scripts/ifup-ippp $RPM_BUILD_ROOT/etc/sysconfig/network-scripts
+install network-scripts/ifdown-ippp $RPM_BUILD_ROOT/etc/sysconfig/network-scripts
+install network-scripts/ifup-isdn $RPM_BUILD_ROOT/etc/sysconfig/network-scripts
+install network-scripts/ifdown-isdn $RPM_BUILD_ROOT/etc/sysconfig/network-scripts
+
+# Install default config files
+
+install defaults/ifcfg-ippp0 $RPM_BUILD_ROOT/etc/sysconfig/network-scripts/ifcfg-ippp0
+#install defaults/ifcfg-isdn0 $RPM_BUILD_ROOT/etc/sysconfig/network-scripts/ifcfg-isdn0
+
+install -d $RPM_BUILD_ROOT/etc/rc.d/init.d
+install init.d/isdn4linux $RPM_BUILD_ROOT/etc/rc.d/init.d
+install init.d/isdnlog $RPM_BUILD_ROOT/etc/rc.d/init.d
+
+install -d $RPM_BUILD_ROOT/etc/sysconfig
+install defaults/isdn $RPM_BUILD_ROOT/etc/sysconfig/isdn
+
+install -d $RPM_BUILD_ROOT/etc/isdn/profile
+install defaults/ippp.default $RPM_BUILD_ROOT/etc/isdn/profile/ippp.default
+install defaults/isdn.default $RPM_BUILD_ROOT/etc/isdn/profile/isdn.default
+install defaults/isdn.map $RPM_BUILD_ROOT/etc/isdn/profile/isdn.map
+install defaults/ippp.map $RPM_BUILD_ROOT/etc/isdn/profile/ippp.map
+
+install -d $RPM_BUILD_ROOT/etc/isdn/profile/card
+install defaults/mycard $RPM_BUILD_ROOT/etc/isdn/profile/card/mycard
+
+install -d $RPM_BUILD_ROOT/etc/isdn/profile/link
+install defaults/myisp $RPM_BUILD_ROOT/etc/isdn/profile/link/myisp
+
+install -d $RPM_BUILD_ROOT/etc/isdn/budget
+#install defaults/budget/ippp0 $RPM_BUILD_ROOT/etc/isdn/budget/ippp0
+
+install -d  $RPM_BUILD_ROOT/etc/isdn/timru
+#install defaults/timru/ippp0 $RPM_BUILD_ROOT/etc/isdn/timru/ippp0
+
+install defaults/my_isdnlog.conf $RPM_BUILD_ROOT/etc/isdn/my_isdnlog.conf
+
+# Install frontend
+
+install -d $RPM_BUILD_ROOT/usr/local/bin
+install bin/isdn $RPM_BUILD_ROOT/usr/local/bin/isdn

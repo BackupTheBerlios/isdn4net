@@ -1,0 +1,58 @@
+
+# /etc/sysconfig/isdn
+
+# Called by /etc/rc.d/init.d/isdn4linux
+# Called by /etc/sysconfig/network-scripts/ifup-ippp
+
+# ## ISDN CARD #######
+
+# driver-id for ISDN-card
+
+I4L_ID="TelesPnP"
+
+# 2. id-string for ICN ISDN-card
+
+# I4L_ID2="ICN2"
+
+# Start ISDNLOG on this card?
+
+I4L_ISDNLOG="yes"
+
+# Hisax Debug Level, 4 (some..) to 31 (all messages)
+
+I4L_DEBUG=0
+
+# kernel module to use (teles, hisax, icn, pcbit)
+I4L_MODULE="hisax"
+
+# D-channel protocol 1=1TR6, 2=EDSS1(Euro-ISDN) for Teles/HiSax
+
+I4L_PROTOCOL=2
+
+# type of HiSax-driver (set to '' for using old teles-modul or within kernel)
+# See below for list of values
+
+I4L_TYPE=14
+
+# IRQ of Teles/HiSax Card
+# eg. 12 or 15 when loading as module
+# set to "" when driver is loaded within kernel
+
+I4L_IRQ="10"
+
+# Membase of Teles/HiSax card (e.g. '0xd2000' for Teles S0/16,
+# '0' for Teles S0/16.3)
+
+I4L_MEMBASE=""
+
+# Portaddress of Teles/HiSax card (e.g. 0xd80, "0" for S0/8)
+
+I4L_PORT="0x5A0"
+
+# for Creatix PNP: IO0 (ISAC)
+
+I4L_IO0=''
+
+# for Creatix PNP: IO1 (HSCX)
+
+I4L_IO1=''

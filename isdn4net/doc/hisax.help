@@ -1,0 +1,75 @@
+
+HiSax Card types:
+
+    Type                Required parameters (in addition to type and protocol)
+
+    1   Teles 16.0               irq, mem, io
+    2   Teles  8.0               irq, mem
+    3   Teles 16.3 (non PnP)     irq, io
+    4   Creatix/Teles PnP        irq, io0 (ISAC), io1 (HSCX)
+    5   AVM A1 (Fritz)           irq, io
+    6   ELSA PCC/PCF cards       io or nothing for autodetect (the iobase is
+                                 required only if you have more than one ELSA
+                                 card in your PC)
+    7   ELSA Quickstep 1000      irq, io  (from isapnp setup)
+    8   Teles 16.3 PCMCIA     	 irq, io
+    9   ITK ix1-micro Rev.2      irq, io
+   10   ELSA PCMCIA		 irq, io  (set with card manager)
+   11   Eicon.Diehl Diva ISA PnP irq, io
+   11   Eicon.Diehl Diva PCI     no parameter
+   12   ASUS COM ISDNLink        irq, io  (from isapnp setup)
+   13   HFC-2BS0 based cards     irq, io
+   14   Teles 16.3c PnP          irq, io
+   15   Sedlbauer Speed Card     irq, io
+   15   Sedlbauer PC/104         irq, io
+   15   Sedlbauer Speed PCI	 no parameter
+   16   USR Sportster internal   irq, io
+   17   MIC card                 irq, io
+   18   ELSA Quickstep 1000PCI   no parameter
+   19   Compaq ISDN S0 ISA card  irq, io0, io1, io (from isapnp setup io=IO2)
+   20   NETjet PCI card          no parameter
+   21   Teles PCI                no parameter
+   22   Sedlbauer Speed Star (PCMCIA) irq, io (set with card manager)
+   24   Dr. Neuhaus Niccy PnP    irq, io0, io1 (from isapnp setup)
+   24   Dr. Neuhaus Niccy PCI    no parameter
+   25   Teles S0Box              irq, io (of the used lpt port)
+   26   AVM A1 PCMCIA (Fritz!)   irq, io (set with card manager)
+   27   AVM PnP (Fritz!PnP)      irq, io  (from isapnp setup)
+   27   AVM PCI (Fritz!PCI)      no parameter
+   28   Sedlbauer Speed Fax+     irq, io (from isapnp setup)
+
+
+At the moment IRQ sharing is only possible with PCI cards. Please make sure
+that your IRQ is free and enabled for ISA use.
+
+
+Examples for module loading
+
+1. Teles 16.3, Euro ISDN, I/O base 280 hex, IRQ 10
+   modprobe hisax type=3 protocol=2 io=0x280 irq=10
+
+2. Teles 16.0, 1TR6 ISDN, I/O base d80 hex, IRQ 5, Memory d0000 hex
+   modprobe hisax protocol=1 type=1 io=0xd80 mem=0xd0000 irq=5
+
+3. Fritzcard, Euro ISDN, I/O base 340 hex, IRQ 10 and ELSA PCF, Euro ISDN
+   modprobe hisax type=5,6 protocol=2,2 io=0x340 irq=10 id=Fritz%Elsa
+
+4. Any ELSA PCC/PCF card, Euro ISDN
+   modprobe hisax type=6 protocol=2
+
+5. Teles 16.3 PnP, Euro ISDN, with isapnp configured
+   isapnp config:  (INT 0 (IRQ 10 (MODE +E)))
+ 		   (IO 0 (BASE 0x0580))
+                   (IO 1 (BASE 0x0180))
+   modprobe hisax type=4 protocol=2 irq=10 io0=0x580 io1=0x180
+
+6. Teles 16.3, Euro ISDN, I/O base 280 hex, IRQ 12 and
+   Teles 16.0, 1TR6, IRQ 5, Memory d0000 hex
+   modprobe hisax type=3,1 protocol=2,1 io=0x280 mem=0,0xd0000
+
+   Please note the dummy 0 memory address for the Teles 16.3, used as a
+   placeholder as described above, in the last example.
+
+7. Teles PCMCIA, Euro ISDN, I/O base 180 hex, IRQ 15 (default values)
+   modprobe hisax type=8 protocol=2 io=0x180 irq=15
+

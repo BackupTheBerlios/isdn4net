@@ -1,0 +1,422 @@
+#!/bin/sh
+#
+# 2000/08/09 Changed handling of unknow card.
+#	Will now try with PCI mode card instead of exiting.
+#   Moved dynamic rerouting so it will only be done on start.
+#   Added some new cards.
+#
+# 2000/07/27 Tested with RedHat 6.2 
+#	You must remove line 38 in /etc/rc.d/init.d/network 
+#	to enable ippp devices at boot on RH62. (This line filters out ippp devices).
+#
+# 2000/07/26 Jürgen Hammelmann: isdn4linux modified because of
+# isdnlog hanging at boot before ippp devices are set!
+# isdnlog is started in a separate script after ippp devices are up!
+#
+# Author (rc.isdn4linux 1.0): 1997/05/08 18:55:03 (J"org Lehrke)
+# Modified (isdn4net >= 1.1): Stein Vråle <stein@terminator.net>
+#
+# This script is loading the needed ISDN-modules
+# This script is designed to work in BSD as well as SysV init setups.
+#
+# You may use the script '/usr/local/bin/isdn' to configure this script
+# Look in /usr/doc/isdn4net for samples.
+# See http:/www.terminator.net/isdn4net/ for more info.
+#
+# Version >= 1.1 is only tested on RedHat 5.x
+# 
+# SysV settings
+# chkconfig: 2345 09 91
+# description: ISDN for Linux subsystem
+
+SYSCONF_FILE=/var/lock/subsys/isdn4linux
+
+usage()
+{
+	echo "Usage: $0 {start|stop|restart}"
+	echo "(Try '/usr/local/bin/isdn' for configuration)"
+}
+
+cleanup()
+{
+	echo ""
+	echo "Initialization of ISDN failed!"
+	echo "Check parameters in '/etc/sysconfig/isdn'!"
+	echo ""
+	modprobe -r $I4L_MODULE
+	break
+}
+
+if [ "$1" == "start" ]; then
+       echo "Starting ISDN for Linux..."
+fi
+
+# Source ISDN configuration, if available
+if [ -f /etc/sysconfig/isdn ] ; then
+	. /etc/sysconfig/isdn
+else
+	I4L_START=no
+fi
+
+
+
+# Load Card configuration
+
+. "$I4L_PROFILEDIR/card/$I4L_CARD"
+
+EXITCODE=1
+
+for x in "1" ; do
+
+	# Check that ISDN is up
+	[ ${I4L_START} = "no" ] && break
+
+	if [ "$I4L_MODULE" = "" ] ; then
+		echo "ISDN-Module not defined in isdn4linux!"
+		break
+	fi
+
+	if [ $# -lt 1 ] ; then usage ; break ; fi
+
+	action=$1
+
+	case "$action" in
+
+	'start')
+		touch $SYSCONF_FILE
+		case "$I4L_MODULE" in
+
+		'teles')
+			echo "Loading (old) Teles driver ..."
+			/sbin/modprobe -v teles teles_id=${I4L_ID} \
+				io=${I4L_MEMBASE},${I4L_IRQ},${I4L_PORT},${I4L_PROTOCOL} >/dev/null
+			if test $? -ne 0; then
+				cleanup
+			fi
+		;;
+
+		'capidrv')
+		
+			echo "Loading driver for CAPI based cards..."
+			/sbin/modprobe -v capidrv >/dev/null
+			if test $? -ne 0; then 
+				cleanup
+			fi
+		;;
+
+		'hisax_fcpcipnp')
+                        echo "Loading driver for Fritz! PCI v2.0  ..."
+                        /sbin/modprobe -v hisax_fcpcipnp protocol=$I4L_PROTOCOL >/dev/null
+                        if test $? -ne 0; then
+	                        cleanup
+			fi
+		;;
+			
+		'hisax')
+
+			CARDTYPE=`echo $I4L_TYPE | tr -d ' '`		 
+			HISAX_PAR1="id=$I4L_ID type=$I4L_TYPE protocol=$I4L_PROTOCOL"
+
+			case "$CARDTYPE" in
+
+			0)
+				I4L_CARDNAME="Module settings from /etc/conf.modules"
+				HISAX_PAR1=""
+				HISAX_PAR2=""
+				;;
+			1)
+				I4L_CARDNAME="Teles 16.0"
+				HISAX_PAR2="irq=$I4L_IRQ mem=$I4L_MEMBASE io=$I4L_PORT"
+				;;
+			2)
+				I4L_CARDNAME="Teles 8.0"
+				HISAX_PAR2="irq=$I4L_IRQ mem=$I4L_MEMBASE"
+				;;
+			3)
+				I4L_CARDNAME="Teles 16.3"
+				HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				;;
+			4)
+				I4L_CARDNAME="Creatix PNP"
+				HISAX_PAR2="irq=$I4L_IRQ io0=$I4L_IO0 io1=$I4L_IO1"
+				;;
+			5)
+				I4L_CARDNAME="AVM A1 (Fritz)"
+				HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				;;
+			6)
+				I4L_CARDNAME="ELSA PCC16"
+				HISAX_PAR2="io=$I4L_PORT"
+				;;
+			7) 
+				I4L_CARDNAME="ELSA Quickstep 1000"
+				HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				;;
+			8) 
+				I4L_CARDNAME="Teles 16.3 PCMCIA"
+				HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				;;
+			9) 
+				I4L_CARDNAME="ITK ix1-micro Rev.2"
+				HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				;;
+			10) 
+				I4L_CARDNAME="ELSA PCMCIA"
+				HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				;;
+			11)
+				if [ -n "$I4L_IRQ" ] ; then
+					I4L_CARDNAME="EICON DIVA ISA PNP"
+					HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				else
+					I4L_CARDNAME="EICON DIVA PCI"
+					HISAX_PAR2=""
+				fi
+				;;
+			12) 
+				I4L_CARDNAME="ASUS COM ISDNLink"
+				HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				;;
+			13) 
+				I4L_CARDNAME="HFC-2BS0 based cards"
+				HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				;;
+			14) 
+				I4L_CARDNAME="Teles 16.3c PnP"
+				HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				;;
+			15) 
+				if [ -n "$I4L_IRQ" ] ; then
+					I4L_CARDNAME="Sedlbauer PC/104 or Speed card"
+					HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"	
+				else
+					I4L_CARDNAME="Sedlbauer Speed PCI"
+					HISAX_PAR2=""
+				fi
+				;;
+			16) 
+				I4L_CARDNAME="USR Sportster internal"
+				HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				;;
+			17) 
+				I4L_CARDNAME="MIC card"
+				HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				;;
+			18) 
+				I4L_CARDNAME="ELSA Quickstep 1000PCI"
+				HISAX_PAR2=""
+				;;
+			19) 
+				I4L_CARDNAME="Compaq ISDN S0 ISA card"
+				HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				;;
+			20) 
+				I4L_CARDNAME="NETjet PCI card"
+				HISAX_PAR2=""
+				;;
+			21) 
+				I4L_CARDNAME="Teles PCI"
+				HISAX_PAR2=""
+				;;
+			22) 
+				I4L_CARDNAME="Sedlbauer Speed Star (PCMCIA)"
+				HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				;;
+			24) 
+				if [ -n "$I4L_IRQ" ] ; then
+					I4L_CARDNAME="Dr. Neuhaus Niccy PnP"
+					HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				else
+					I4L_CARDNAME="Dr. Neuhaus Niccy PCI"
+					HISAX_PAR2=""
+				fi
+				;;
+			25) 
+				I4L_CARDNAME="Teles S0Box"
+				HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				;;
+			26) 
+				I4L_CARDNAME="AVM A1 PCMCIA (Fritz!)"
+				HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				;;
+			27) 
+				if [ -n "$I4L_IRQ" ] ; then
+					I4L_CARDNAME="AVM PnP (Fritz!PnP)"
+					HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				else
+					I4L_CARDNAME="AVM PCI (Fritz!PCI)"
+					HISAX_PAR2=""
+				fi
+				;;
+			28) 
+				I4L_CARDNAME="Sedlbauer Speed Fax+"
+				HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				;;
+			29)
+				I4L_CARDNAME="Siemens I-Surf 1.0"
+				HISAX_PAR2="irq=$I4L_IRQ  io=$I4L_PORT mem=$I4L_MEMBASE"
+				;;
+			30) 
+				I4L_CARDNAME="ACER P10"
+				HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				;;
+			31) 
+				I4L_CARDNAME="HST Saphir"
+				HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				;;
+			32) 
+				I4L_CARDNAME="Telekom A4T (PCI)"
+				HISAX_PAR2=""			
+				;;
+			34) 
+				I4L_CARDNAME="HFC 2BDS0 (aka Billion)"
+				HISAX_PAR2=""			
+				;;
+			34) 
+				if [ -n "$I4L_IRQ" ] ; then
+					I4L_CARDNAME="Gazel ISDN (ISA)"
+					HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				else
+					I4L_CARDNAME="Gazel ISDN (PCI)"
+					HISAX_PAR2=""
+				fi
+				;;
+			35) 
+				I4L_CARDNAME="HFC 2BDS0 (aka Billion)"
+				HISAX_PAR2=""			
+				;;
+			36) 
+				I4L_CARDNAME="W6692 chip based (PCI)"
+				HISAX_PAR2=""			
+				;;
+			37)
+				I4L_CARDNAME="HFC 2BDS0 S+, SP/PCMCIA"
+				HISAX_PAR2="irq=$I4L_IRQ io=$I4L_PORT"
+				;;
+			*)
+				I4L_CARDNAME="Unknown card. Using PCI mode (no parameters)"
+				HISAX_PAR2=""
+				;;
+		esac
+
+		HISAX_PAR="${HISAX_PAR1} ${HISAX_PAR2}"
+
+		echo "Loading HiSax driver"
+		echo "CardID: $I4L_ID"
+		echo "CardType: $I4L_TYPE"
+		echo "CardName: $I4L_CARDNAME"
+		echo "Parameters: $HISAX_PAR"
+		test -z "$I4L_FIRMWARE" || echo "Firmware: $I4L_FIRMWARE"
+
+		/sbin/modprobe -v hisax $HISAX_PAR >/dev/null
+
+		if test $? -ne 0; then
+			cleanup
+		fi
+
+		# enable debugging
+		test -z "$I4L_DEBUG" || hisaxctrl $I4L_ID 1 $I4L_DEBUG	
+		# load firmware if needed
+		test -z "$I4L_FIRMWARE" || hisaxctrl $I4L_ID 9 $I4L_FIRMWARE
+	;;
+
+	'icn')
+		echo "Loading ICN driver ..."
+		ICN_PAR="portbase=$I4l_PORT membase=$I4l_MEMBASE icn_id=$I4l_ID"
+		test -z "$I4l_ID2" || ICN_PAR="$ICN_PAR icn_id2=$I4l_ID2"
+		/sbin/modprobe -v icn "$ICN_PAR"
+		if test $? -ne 0; then
+		cleanup
+		fi
+	;;
+
+	*)
+		echo "Unknown ISDN driver $I4L_MODULE!"
+		break
+	;;
+
+	esac
+
+        # Configure kernel for dynamic ip mode
+        if [ -n ${I4L_DYN} ] ; then
+                echo "Configuring kernel for dynamic ip re-routing"
+                echo ${I4L_DYN} > /proc/sys/net/ipv4/ip_dynaddr
+        fi
+													
+	# start iprofd ?
+	if [ "$I4L_IPROFD" = "yes" ] ; then
+		echo "Starting iprofd ..."
+			iprofd /etc/isdn/modemsettings
+	fi
+
+	# isdnctrl Verbose level
+	test -z $I4L_VERBOSE || 
+		isdnctrl verbose $I4L_VERBOSE
+
+	;;
+
+	'stop')
+
+	echo "Shutting down isdn4linux"
+
+	# Find all active devices and take them down with ifdown
+	echo "Shutting down isdn/ippp devices (if any)"	
+
+	ippps=`cat /proc/net/dev |grep ippp|awk -F : '{print $1}'`
+	isdns=`cat /proc/net/dev |grep isdn|awk -F : '{print $1}'`
+	devs="${ippps}${isdns}"
+	if [ ! "$devs" = "" ] ; then	
+		echo "$ippps $isdns" | while read dev ; do ifdown "$dev" ; done	  
+	fi
+
+	# more ipppds left? killem all...
+
+	ippps=`ps xa |grep ipppd|awk '{print $1}'`
+	if [ ! "$ippps" = "" ] ; then	
+		echo "$ippps" | while read pid; do killall -9 "$pid" ; done	  
+	fi
+
+	# Shutdown iprofd
+	pid=""
+	pid=`ps axww|grep -v grep|grep iprofd |awk '{print $1}'`
+	if [ -n "$pid" ] ; then
+		echo "Stopping iprofd ..." 
+		kill $pid > /dev/null 2>&1
+	fi
+	echo "Unloading ISDN drivers ..."
+	# unload modules
+		/sbin/modprobe -r $I4L_MODULE
+	rm -f $SYSCONF_FILE
+	;;
+
+	'restart')
+	$0 stop
+	$0 start
+	;;
+
+	'reload')
+	    echo -n "Reloading isdn4linux: "
+	    $0 start
+	    echo
+	;;
+
+	'status')
+	    if [ -f $SYSCONF_FILE ]
+	    then
+		echo "isdn4linux is enabled"
+	    else
+		echo "isdn4linux is disabled"
+	    fi
+	;;
+
+	*)
+	usage
+	break
+	;;
+
+	esac
+	EXITCODE=0
+
+done
+
+exit $EXITCODE
