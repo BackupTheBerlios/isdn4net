@@ -10,7 +10,7 @@ IPADDR="192.168.100.1"
 REMOTEADDR="192.168.100.2"
 
 # Bootmode
-ONBOOT="no"
+ONBOOT="yes"
 
 # Firmware to load
 FIRMWARE=""

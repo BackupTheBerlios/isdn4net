@@ -1,9 +1,9 @@
 #!/bin/sh
 #
-# 2000/08/09 Changed handling of unknow card.
+# 2000/08/09 Changed handling of unknown card.
 #	Will now try with PCI mode card instead of exiting.
-#   Moved dynamic rerouting so it will only be done on start.
-#   Added some new cards.
+#   	Moved dynamic rerouting so it will only be done on start.
+#   	Added some new cards.
 #
 # 2000/07/27 Tested with RedHat 6.2 
 #	You must remove line 38 in /etc/rc.d/init.d/network 
@@ -34,7 +34,7 @@ SYSCONF_FILE=/var/lock/subsys/isdn4linux
 usage()
 {
 	echo "Usage: $0 {start|stop|restart}"
-	echo "(Try '/usr/local/bin/isdn' for configuration)"
+	echo "(Try 'isdn' for configuration)"
 }
 
 cleanup()
@@ -330,8 +330,17 @@ for x in "1" ; do
 		fi
 	;;
 
+	'ippp*')
+		echo "Loading driver defined in modules.conf ..."
+		/sbin/modprobe -v $I4L_MODULE >/dev/null
+                        if test $? -ne 0; then
+                          cleanup
+                        fi
+		
 	*)
 		echo "Unknown ISDN driver $I4L_MODULE!"
+		echo "Correct this or set an alias in /etc/modules.conf:"
+		echo "Hint: alias ippp0 $I4L_MODULE"
 		break
 	;;
 
